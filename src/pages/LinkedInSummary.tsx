@@ -25,7 +25,7 @@ const LinkedInSummary = () => {
   const [error, setError] = useState('');
 
   const generatePrompt = (data: typeof formData) => {
-    return `Create a compelling and professional LinkedIn summary for the following person:
+    return `Write a LinkedIn summary with these details:
 
 Name: ${data.name}
 Current Role: ${data.jobTitle}
@@ -35,16 +35,15 @@ Skills: ${data.skills}
 Career Goals: ${data.careerGoals}
 Achievements: ${data.achievements}
 
-Please write a well-structured, engaging summary that:
-1. Hooks the reader in the first line
-2. Highlights their expertise and experience
-3. Showcases their skills and achievements
-4. Reflects their career aspirations
-5. Maintains a professional yet personable tone
-6. Is optimized for LinkedIn's format (2000 characters max)
-7. Includes appropriate keywords for their industry
-
-Format the summary in a way that's easy to read with proper paragraphing.`;
+Requirements:
+1. Start directly with the summary content - no introductions or explanations
+2. Write in first person
+3. Make it engaging and professional
+4. Include achievements and skills naturally in the text
+5. Keep it under 2000 characters
+6. Use proper paragraphing and bullet points where appropriate
+7. Do not add any hashtags at the end
+8. Do not include any meta text or explanations about the summary`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +58,7 @@ Format the summary in a way that's easy to read with proper paragraphing.`;
 
     try {
       const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite-preview-02-05" });
       const prompt = generatePrompt(formData);
       
       const result = await model.generateContent(prompt);
@@ -175,13 +174,33 @@ Format the summary in a way that's easy to read with proper paragraphing.`;
           )}
           {generatedSummary && !isLoading && (
             <div className="prose max-w-none">
-              <div className="bg-gray-50 p-4 rounded-lg overflow-auto max-h-[600px]">
-                <ReactMarkdown>{generatedSummary}</ReactMarkdown>
+              <div className="bg-gray-50 p-6 rounded-lg overflow-auto max-h-[600px] linkedin-preview">
+                <div className="text-gray-800 leading-relaxed whitespace-pre-wrap" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif' }}>
+                  {generatedSummary}
+                </div>
               </div>
+              <style jsx global>{`
+                .linkedin-preview {
+                  font-size: 16px;
+                  line-height: 1.6;
+                }
+                .linkedin-preview p {
+                  margin-bottom: 1rem;
+                }
+                .linkedin-preview ul {
+                  list-style-type: disc;
+                  margin-left: 1.5rem;
+                  margin-bottom: 1rem;
+                }
+                .linkedin-preview li {
+                  margin-bottom: 0.5rem;
+                }
+              `}</style>
               <div className="flex gap-4 mt-4">
                 <Button
                   onClick={() => navigator.clipboard.writeText(generatedSummary)}
                   type="button"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-800"
                 >
                   Copy Text
                 </Button>
@@ -195,17 +214,47 @@ Format the summary in a way that's easy to read with proper paragraphing.`;
                             <title>LinkedIn Summary Preview</title>
                             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
                             <style>
+                              body {
+                                background-color: #ffffff;
+                                color: #24292e;
+                              }
                               .markdown-body {
                                 box-sizing: border-box;
                                 min-width: 200px;
                                 max-width: 980px;
                                 margin: 0 auto;
                                 padding: 45px;
+                                background-color: #ffffff;
+                                color: #24292e;
+                                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                                line-height: 1.6;
+                              }
+                              .markdown-body * {
+                                color: inherit;
+                              }
+                              .markdown-body p {
+                                margin-bottom: 16px;
+                              }
+                              .markdown-body ul {
+                                margin-bottom: 16px;
+                                padding-left: 2em;
+                              }
+                              .markdown-body li {
+                                margin: 0.25em 0;
+                              }
+                              @media (max-width: 767px) {
+                                .markdown-body {
+                                  padding: 15px;
+                                }
                               }
                             </style>
                           </head>
                           <body class="markdown-body">
-                            ${new ReactMarkdown().render(generatedSummary)}
+                            <div id="content"></div>
+                            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                            <script>
+                              document.getElementById('content').innerHTML = marked.parse(${JSON.stringify(generatedSummary)});
+                            </script>
                           </body>
                         </html>
                       `);

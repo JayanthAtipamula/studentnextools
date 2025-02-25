@@ -51,7 +51,7 @@ Social Links:
 - LeetCode: ${data.leetcodeLink}
 
 IGNORE LICENSES
-Please format it beautifully with markdown, including appropriate emojis, badges, and sections. Make it visually appealing and professional.`;
+Please format it as a professional README.md with markdown,  including appropriate emojis, badges, and sections. Make it visually appealing and professional. DONT INCLUDE ANY SUGGESTIONS OR IMPROVEMENTS`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +73,10 @@ Please format it beautifully with markdown, including appropriate emojis, badges
       const response = await result.response;
       const text = response.text();
       
-      setGeneratedProfile(text);
+      // Remove markdown code block indicators if present
+      const cleanedText = text.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
+      
+      setGeneratedProfile(cleanedText);
     } catch (err) {
       setError('Failed to generate profile. Please check your API key and try again.');
       console.error('Error generating profile:', err);
@@ -275,6 +278,7 @@ Please format it beautifully with markdown, including appropriate emojis, badges
                             <style>
                               body {
                                 background-color: #ffffff;
+                                color: #24292e;
                               }
                               .markdown-body {
                                 box-sizing: border-box;
@@ -283,6 +287,11 @@ Please format it beautifully with markdown, including appropriate emojis, badges
                                 margin: 0 auto;
                                 padding: 45px;
                                 background-color: #ffffff;
+                                color: #24292e;
+                                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                              }
+                              .markdown-body * {
+                                color: inherit;
                               }
                               @media (max-width: 767px) {
                                 .markdown-body {
@@ -292,7 +301,11 @@ Please format it beautifully with markdown, including appropriate emojis, badges
                             </style>
                           </head>
                           <body class="markdown-body">
-                            ${new ReactMarkdown().render(generatedProfile)}
+                            <div id="content"></div>
+                            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                            <script>
+                              document.getElementById('content').innerHTML = marked.parse(${JSON.stringify(generatedProfile)});
+                            </script>
                           </body>
                         </html>
                       `);
